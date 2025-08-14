@@ -5,7 +5,6 @@ import "sim-idx-generated/Generated.sol";
 import "./utils/ERC20Metadata.sol";
 import "./DexUtils.sol";
 import "./interfaces/Uniswap/UniswapInterfaces.sol";
-import "./interfaces/IDexListener.sol";
 
 contract UniswapV3Listener is
     UniswapV3Pool$OnSwapFunction,
