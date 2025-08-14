@@ -7,11 +7,7 @@ import "./utils/ERC20Metadata.sol";
 import "./DexUtils.sol";
 import "./interfaces/Uniswap/UniswapInterfaces.sol";
 
-contract UniswapV2Listener is
-    UniswapV2Pair$OnSwapEvent,
-    DexUtils,
-
-{
+contract UniswapV2Listener is UniswapV2Pair$OnSwapEvent, DexUtils {
     event UniswapV2Swap(
         uint64 chainId,
         bytes32 transactionHash,

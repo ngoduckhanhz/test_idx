@@ -6,11 +6,7 @@ import "./utils/ERC20Metadata.sol";
 import "./DexUtils.sol";
 import "./interfaces/Uniswap/UniswapInterfaces.sol";
 
-contract UniswapV3Listener is
-    UniswapV3Pool$OnSwapFunction,
-    DexUtils,
-    IDexListener
-{
+contract UniswapV3Listener is UniswapV3Pool$OnSwapFunction, DexUtils {
     event UniswapV3Swap(
         uint64 chainId,
         bytes32 transactionHash,
