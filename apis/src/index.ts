@@ -1,30 +1,83 @@
-import { eq } from "drizzle-orm";
-import { poolCreated } from "./db/schema/Listener"; // Adjust the import path as necessary
-import { types, db, App, middlewares } from "@duneanalytics/sim-idx"; // Import schema to ensure it's registered
+import { desc, and, gte, lte, SQL } from "drizzle-orm";
+import { App, db, middlewares } from "@duneanalytics/sim-idx";
+import {
+  tornadoDeposit,
+  tornadoWithdrawal,
+  uniswapV2Swap,
+  uniswapV3Swap,
+} from "./db/schema/Listener";
 
-const filterToken0 = types.Address.from(
-  "7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9"
-);
+const app = App.create<{ DB_CONNECTION_STRING: string }>();
 
-const app = App.create();
 app.use("*", middlewares.authentication);
 
-app.get("/*", async (c) => {
-  try {
-    const result = await db
-      .client(c)
-      .select()
-      .from(poolCreated)
-      .where(eq(poolCreated.token0, filterToken0))
-      .limit(5);
-
-    return Response.json({
-      result: result,
-    });
-  } catch (e) {
-    console.error("Database operation failed:", e);
-    return Response.json({ error: (e as Error).message }, { status: 500 });
+function buildWhereClause(
+  table: any,
+  fromBlock?: string,
+  toBlock?: string
+): SQL | undefined {
+  if (fromBlock && toBlock) {
+    return and(
+      gte(table.blockNumber, Number(fromBlock)),
+      lte(table.blockNumber, Number(toBlock))
+    );
+  } else if (fromBlock) {
+    return gte(table.blockNumber, Number(fromBlock));
+  } else if (toBlock) {
+    return lte(table.blockNumber, Number(toBlock));
   }
+  return undefined;
+}
+
+async function getEvents(c: any, table: any) {
+  const client = db.client(c);
+
+  const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 500);
+  const offset = parseInt(c.req.query("offset") ?? "0", 10);
+  const fromBlock = c.req.query("fromBlock");
+  const toBlock = c.req.query("toBlock");
+
+  const whereClause = buildWhereClause(table, fromBlock, toBlock);
+  if (whereClause) {
+    return await client
+      .select()
+      .from(table)
+      .where(whereClause)
+      .orderBy(desc(table.blockNumber))
+      .limit(limit)
+      .offset(offset);
+  } else {
+    return await client
+      .select()
+      .from(table)
+      .orderBy(desc(table.blockNumber))
+      .limit(limit)
+      .offset(offset);
+  }
+}
+
+// Tornado Deposit API
+app.get("/tornado/deposits", async (c) => {
+  const res = await getEvents(c, tornadoDeposit);
+  return Response.json(res);
+});
+
+// Tornado Withdraw API
+app.get("/tornado/withdraws", async (c) => {
+  const res = await getEvents(c, tornadoWithdrawal);
+  return Response.json(res);
+});
+
+// Uniswap V2 Swaps API
+app.get("/uniswap/v2/swaps", async (c) => {
+  const res = await getEvents(c, uniswapV2Swap);
+  return Response.json(res);
+});
+
+// Uniswap V3 Swaps API
+app.get("/uniswap/v3/swaps", async (c) => {
+  const res = await getEvents(c, uniswapV3Swap);
+  return Response.json(res);
 });
 
 export default app;
