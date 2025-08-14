@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "sim-idx-generated/Generated.sol";
-import "./types/DexTrades.sol";
+// import "./types/DexTrades.sol";
 import "./utils/ERC20Metadata.sol";
 import "./DexUtils.sol";
 import "./interfaces/Uniswap/UniswapInterfaces.sol";
@@ -10,7 +10,7 @@ import "./interfaces/Uniswap/UniswapInterfaces.sol";
 contract UniswapV2Listener is
     UniswapV2Pair$OnSwapEvent,
     DexUtils,
-    IDexListener
+
 {
     event UniswapV2Swap(
         uint64 chainId,
