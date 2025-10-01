@@ -1,7 +1,6 @@
 [app]
 name = "test"
-[app]
-name = "sim_puller_data"
+
 
 [[env.dev.sinks]]
 type = "kafka"
