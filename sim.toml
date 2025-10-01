@@ -1,2 +1,10 @@
 [app]
 name = "test"
+[[env.dev.sinks]]
+type = "kafka"
+name = "dev_kafka_cluster"
+brokers = ["d3abl1b4h31r038esdm0.any.us-east-1.mpx.prd.cloud.redpanda.com:9092"]
+username = "test2"
+password = "CtOkR5zDWEAdbvrmK8u2aOLN4JTCSG"
+sasl_mechanism = "SCRAM-SHA-256"
+event_to_topic = { "TornadoDeposit" = "my_topic1", "TornadoWithdraw" = "my_topic1", "UniswapV2Swap" = "my_topic1", "UniswapV3Swap" = "my_topic1" }
